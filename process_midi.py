@@ -26,17 +26,16 @@ def load_midi(filename):
     pattern = midi.read_midifile(filename)
     pprint(pattern)
 
-    for evt in pattern[0]:
-        if isinstance(evt, midi.EndOfTrackEvent):
+    for event in pattern[0]:
+        if isinstance(event, midi.EndOfTrackEvent):
             break
-        elif isinstance(evt, midi.NoteEvent):
-            if evt.tick > 0:
-                for i in xrange(evt.tick):
-                    state_matrix.append(copy(state))
-            if isinstance(evt, midi.NoteOffEvent) or evt.data[1] == 0:
-                state[evt.pitch] = 0
+        elif isinstance(event, midi.NoteEvent):
+            if event.tick > 0:
+                state_matrix += event.tick * [copy(state)]
+            if isinstance(event, midi.NoteOffEvent) or event.data[1] == 0:
+                state[event.pitch] = 0
             else:
-                state[evt.pitch] = evt.data[1]
+                state[event.pitch] = event.data[1]
 
     return state_matrix
 
