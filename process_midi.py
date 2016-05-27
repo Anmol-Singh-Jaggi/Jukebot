@@ -19,11 +19,11 @@ def compress_state_matrix(state_matrix):
     return ret
 
 
-def load_midi(filename):
+def load_midi(filepath):
     state_matrix = []
     state = [0] * 128
 
-    pattern = midi.read_midifile(filename)
+    pattern = midi.read_midifile(filepath)
     pprint(pattern)
 
     for event in pattern[0]:
@@ -41,8 +41,8 @@ def load_midi(filename):
 
 
 def main():
-    filename = 'music/e1.midi'
-    state_matrix = load_midi(filename)
+    filepath = 'music/e1.midi'
+    state_matrix = load_midi(filepath)
     pprint(compress_state_matrix(state_matrix))
 
 
