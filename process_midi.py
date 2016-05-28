@@ -1,4 +1,9 @@
 #!/usr/bin/env python2
+'''
+Convert midi pattern to matrix and back.
+Currently full support provided for midi-format 0 only.
+Use for format 1 and 2 at your own risk !
+'''
 import midi
 from copy import copy
 from pprint import pprint
@@ -52,6 +57,8 @@ def load_midi(filepath):
     pattern = midi.read_midifile(filepath)
     pprint(pattern, open('pattern_correct', 'w'))
 
+    tempo_event = None
+
     for track in pattern:
         # Null state
         state = [0] * 128
@@ -71,14 +78,13 @@ def load_midi(filepath):
                 else:
                     state[event.pitch] = event.data[1]
 
-    # Find the tempo-event in the pattern.
-    # This is not required for RNN training.
-    # But is required to generate coherent music.
-    tempo_event = None
-    for i in xrange(10):
-        if isinstance(pattern[0][i], midi.SetTempoEvent):
-            tempo_event = pattern[0][i]
-            break
+        # Find the tempo-event in the track.
+        # This is not required for RNN training.
+        # But is required to generate coherent music.
+        for i in xrange(min(10, len(track))):
+            if isinstance(track[i], midi.SetTempoEvent):
+                tempo_event = track[i]
+                break
 
     return state_matrix, (pattern.resolution, tempo_event)
 
@@ -135,8 +141,7 @@ def dump_midi(state_matrix, filepath, meta_info=None):
     :returns: The pattern corresponding to the state matrix.
     :return_type: list
     """
-    resolution = meta_info[0] if meta_info else None
-    tempo_event = meta_info[1] if meta_info else None
+    resolution, tempo_event = meta_info if meta_info else None
 
     pattern = midi.Pattern(resolution=resolution)
     track = midi.Track()
