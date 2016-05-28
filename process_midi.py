@@ -5,6 +5,15 @@ from pprint import pprint
 
 
 def compress_state(state):
+    """
+    Outputs the list of notes which are ON in the current state.
+    Used mainly for printing/debugging.
+    :param state: A sparse vector containing notes and their volumes.
+    state[pitch] = volume
+    :type state: list
+    :returns: A list of the notes which are ON in the input state.
+    :return_type: list
+    """
     ret = []
     for pitch, volume in enumerate(state):
         if volume > 0:
@@ -13,6 +22,15 @@ def compress_state(state):
 
 
 def compress_state_matrix(state_matrix):
+    """
+    Outputs a 2-D matrix of notes which are ON in the states.
+    Used mainly for printing/debugging.
+    :param state_matrix: A sparse matrix containing notes and their volumes.
+    state_matrix[state_index][pitch] = volume
+    :type state_matrix: 2-D list
+    :returns: A matrix of the notes which are ON in a state.
+    :return_type: str
+    """
     ret = ""
     for idx, state in enumerate(state_matrix):
         ret += str(idx) + ".) " + str(compress_state(state)) + "\n"
@@ -20,7 +38,17 @@ def compress_state_matrix(state_matrix):
 
 
 def load_midi(filepath):
+    """
+    Loads a midi file and outputs the corresponding 'state_matrix'.
+    state_matrix[tick][pitch] = volume
+    Each row corresponds to the state of notes in a tick.
+    :param filepath: The path of the midi file.
+    :type filepath: str
+    :returns: The state-matrix and some meta-info (resolution, tempo_event)
+    :return_type: (2-D list, (int, SetTempoEvent or None))
+    """
     state_matrix = []
+    # Null state
     state = [0] * 128
 
     pattern = midi.read_midifile(filepath)
@@ -33,12 +61,18 @@ def load_midi(filepath):
             break
         elif isinstance(event, midi.NoteEvent):
             if event.tick > 0:
+                # A change in state has happened.
+                # Append the current state to the state_matrix.
                 state_matrix += event.tick * [copy(state)]
-            if isinstance(event, midi.NoteOffEvent) or event.data[1] == 0:
+            if isinstance(event, midi.NoteOffEvent):
+                # Make the volume of the pitch to be 0
                 state[event.pitch] = 0
             else:
                 state[event.pitch] = event.data[1]
 
+    # Find the tempo-event in the pattern.
+    # This is not required for RNN training.
+    # But is required to generate coherent music.
     tempo_event = None
     for i in xrange(10):
         if isinstance(pattern[0][i], midi.SetTempoEvent):
@@ -49,6 +83,15 @@ def load_midi(filepath):
 
 
 def get_next_different_state(state_matrix, index):
+    """
+    Helper for dump_midi().
+    Find the index of the next state which is different from the input state.
+    :param state_matrix: The state-matrix.
+    :type state_matrix: 2-D list
+    :returns: The index of the (chronological) next state which is different
+    from the input state.
+    :return_type: int
+    """
     for i in xrange(index + 1, len(state_matrix)):
         if state_matrix[i] != state_matrix[index]:
             return i
@@ -56,6 +99,16 @@ def get_next_different_state(state_matrix, index):
 
 
 def state_diff(current_state, next_state):
+    """
+    Helper for dump_midi().
+    Finds the notes that have changed state (ON/OFF) between 2 states (ticks).
+    :param current_state: The first state.
+    :type current_state: list
+    :param next_state: The chronologically second state.
+    :type next_state: list
+    :returns: The set of notes which have been changed b/w 2 states.
+    :return_type: ((int, int), (int, int))
+    """
     notes_on = []
     notes_off = []
 
@@ -69,6 +122,18 @@ def state_diff(current_state, next_state):
 
 
 def dump_midi(state_matrix, filepath, meta_info=None):
+    """
+    Converts a state_matrix to the corresponding 'pattern'
+    and writes the pattern as a midi file.
+    :param state_matrix: The state matrix.
+    :type state_matrix: 2-D list
+    :param filepath: The path of the output midi file.
+    :type filepath: str
+    :param meta_info: Resolution and tempo-event of the pattern.
+    :type meta_info: (int, SetTempoEvent or None) or None
+    :returns: The pattern corresponding to the state matrix.
+    :return_type: list
+    """
     resolution = meta_info[0] if meta_info else None
     tempo_event = meta_info[1] if meta_info else None
 
@@ -78,7 +143,7 @@ def dump_midi(state_matrix, filepath, meta_info=None):
     if tempo_event:
         track.append(tempo_event)
 
-    # Append the very first tick
+    # Append the very first tick (which will only have NoteOn events)
     notes_on, _ = state_diff([0] * 128, state_matrix[0])
     for note in notes_on:
         track.append(midi.NoteOnEvent(tick=0, channel=0, data=note))
@@ -98,6 +163,8 @@ def dump_midi(state_matrix, filepath, meta_info=None):
         for note in notes_on:
             track.append(midi.NoteOnEvent(
                 tick=ticks_elapsed, channel=0, data=note))
+            # The rest of the events are happening simultaneously,
+            # so set time_elapsed (tick) = 0 for them
             ticks_elapsed = 0
 
         for note in notes_off:
