@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+'''
+Generate custom midi files for debugging.
+'''
 import midi
 
 
