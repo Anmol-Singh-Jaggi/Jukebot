@@ -48,27 +48,28 @@ def load_midi(filepath):
     :return_type: (2-D list, (int, SetTempoEvent or None))
     """
     state_matrix = []
-    # Null state
-    state = [0] * 128
 
     pattern = midi.read_midifile(filepath)
-    #pprint(pattern, open('pattern_correct', 'w'))
+    pprint(pattern, open('pattern_correct', 'w'))
 
-    for event in pattern[0]:
-        if isinstance(event, midi.EndOfTrackEvent):
-            # Append the final state one time as EndOfTrackEvent has tick = 1
-            state_matrix += [copy(state)]
-            break
-        elif isinstance(event, midi.NoteEvent):
-            if event.tick > 0:
-                # A change in state has happened.
-                # Append the current state to the state_matrix.
-                state_matrix += event.tick * [copy(state)]
-            if isinstance(event, midi.NoteOffEvent):
-                # Make the volume of the pitch to be 0
-                state[event.pitch] = 0
-            else:
-                state[event.pitch] = event.data[1]
+    for track in pattern:
+        # Null state
+        state = [0] * 128
+        for event in track:
+            if isinstance(event, midi.EndOfTrackEvent):
+                # Append the final state 1 time as EndOfTrackEvent has tick = 1
+                state_matrix += [copy(state)]
+                break
+            elif isinstance(event, midi.NoteEvent):
+                if event.tick > 0:
+                    # A change in state has happened.
+                    # Append the current state to the state_matrix.
+                    state_matrix += event.tick * [copy(state)]
+                if isinstance(event, midi.NoteOffEvent):
+                    # Make the volume of the pitch to be 0
+                    state[event.pitch] = 0
+                else:
+                    state[event.pitch] = event.data[1]
 
     # Find the tempo-event in the pattern.
     # This is not required for RNN training.
@@ -181,7 +182,7 @@ def dump_midi(state_matrix, filepath, meta_info=None):
 
 
 def main():
-    filepath = 'music/bebop.mid'
+    filepath = 'music/alb_esp1.mid'
     state_matrix, meta_info = load_midi(filepath)
     pattern = dump_midi(state_matrix, 'out.mid', meta_info)
     #pprint(pattern, open('pattern_gen', 'w'))
