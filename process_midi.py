@@ -55,7 +55,7 @@ def load_midi(filepath):
     state_matrix = []
 
     pattern = midi.read_midifile(filepath)
-    pprint(pattern, open('pattern_correct', 'w'))
+    #pprint(pattern, open('pattern_correct', 'w'))
 
     tempo_event = None
 
