@@ -42,7 +42,7 @@ def compress_state_matrix(state_matrix):
     return ret
 
 
-def load_midi(filepath):
+def midi_to_sequence(filepath):
     """
     Loads a midi file and outputs the corresponding 'state_matrix'.
     state_matrix[tick][pitch] = volume
@@ -91,7 +91,7 @@ def load_midi(filepath):
 
 def get_next_different_state(state_matrix, index):
     """
-    Helper for dump_midi().
+    Helper for sequence_to_midi().
     Find the index of the next state which is different from the input state.
     :param state_matrix: The state-matrix.
     :type state_matrix: 2-D list
@@ -107,7 +107,7 @@ def get_next_different_state(state_matrix, index):
 
 def state_diff(current_state, next_state):
     """
-    Helper for dump_midi().
+    Helper for sequence_to_midi().
     Finds the notes that have changed state (ON/OFF) between 2 states (ticks).
     :param current_state: The first state.
     :type current_state: list
@@ -128,7 +128,7 @@ def state_diff(current_state, next_state):
     return (notes_on, notes_off)
 
 
-def dump_midi(state_matrix, filepath, meta_info=None):
+def sequence_to_midi(state_matrix, filepath, meta_info=None):
     """
     Converts a state_matrix to the corresponding 'pattern'
     and writes the pattern as a midi file.
@@ -188,8 +188,8 @@ def dump_midi(state_matrix, filepath, meta_info=None):
 
 def main():
     filepath = 'music/alb_esp1.mid'
-    state_matrix, meta_info = load_midi(filepath)
-    pattern = dump_midi(state_matrix, 'out.mid', meta_info)
+    state_matrix, meta_info = midi_to_sequence(filepath)
+    pattern = sequence_to_midi(state_matrix, 'out.mid', meta_info)
     #pprint(pattern, open('pattern_gen', 'w'))
 
 
