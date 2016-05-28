@@ -42,7 +42,6 @@ def load_midi(filepath):
 
 def get_next_different_state(state_matrix, index):
     for i in xrange(index + 1, len(state_matrix)):
-        # print 'Inside, ', i
         if state_matrix[i] != state_matrix[index]:
             return i
     return len(state_matrix)
@@ -86,9 +85,12 @@ def dump_midi(state_matrix, filepath):
         for note in notes_on:
             track.append(midi.NoteOnEvent(
                 tick=ticks_elapsed, channel=0, data=note))
+            ticks_elapsed = 0
+
         for note in notes_off:
             track.append(midi.NoteOffEvent(
                 tick=ticks_elapsed, channel=0, data=note))
+            ticks_elapsed = 0
 
         current_state_index = next_state_index
 
