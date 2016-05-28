@@ -1,2 +1,2 @@
 # Music-generation-using-neural-networks
-Generating artifical music using Recurrent Neural Networks
+Generating artificial music using Recurrent Neural Networks
