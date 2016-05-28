@@ -26,7 +26,7 @@ def load_midi(filepath):
     pattern = midi.read_midifile(filepath)
     #pprint(pattern, open('pattern_correct', 'w'))
 
-    for i, event in enumerate(pattern[0]):
+    for event in pattern[0]:
         if isinstance(event, midi.EndOfTrackEvent):
             # Append the final state one time as EndOfTrackEvent has tick = 1
             state_matrix += [copy(state)]
