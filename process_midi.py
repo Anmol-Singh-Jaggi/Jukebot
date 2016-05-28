@@ -24,10 +24,12 @@ def load_midi(filepath):
     state = [0] * 128
 
     pattern = midi.read_midifile(filepath)
-    pprint(pattern)
+    #pprint(pattern, open('pattern_correct', 'w'))
 
-    for event in pattern[0]:
+    for i, event in enumerate(pattern[0]):
         if isinstance(event, midi.EndOfTrackEvent):
+            # Append the final state one time as EndOfTrackEvent has tick = 1
+            state_matrix += [copy(state)]
             break
         elif isinstance(event, midi.NoteEvent):
             if event.tick > 0:
@@ -37,7 +39,13 @@ def load_midi(filepath):
             else:
                 state[event.pitch] = event.data[1]
 
-    return state_matrix
+    tempo_event = None
+    for i in xrange(10):
+        if isinstance(pattern[0][i], midi.SetTempoEvent):
+            tempo_event = pattern[0][i]
+            break
+
+    return state_matrix, (pattern.resolution, tempo_event)
 
 
 def get_next_different_state(state_matrix, index):
@@ -60,10 +68,15 @@ def state_diff(current_state, next_state):
     return (notes_on, notes_off)
 
 
-def dump_midi(state_matrix, filepath):
-    pattern = midi.Pattern()
+def dump_midi(state_matrix, filepath, meta_info=None):
+    resolution = meta_info[0] if meta_info else None
+    tempo_event = meta_info[1] if meta_info else None
+
+    pattern = midi.Pattern(resolution=resolution)
     track = midi.Track()
     pattern.append(track)
+    if tempo_event:
+        track.append(tempo_event)
 
     # Append the very first tick
     notes_on, _ = state_diff([0] * 128, state_matrix[0])
@@ -101,12 +114,10 @@ def dump_midi(state_matrix, filepath):
 
 
 def main():
-    filepath = 'music/debug.mid'
-    state_matrix = load_midi(filepath)
-    print compress_state_matrix(state_matrix)
-    print '\n' * 5
-    pattern = dump_midi(state_matrix, 'out.mid')
-    pprint(pattern)
+    filepath = 'music/bebop.mid'
+    state_matrix, meta_info = load_midi(filepath)
+    pattern = dump_midi(state_matrix, 'out.mid', meta_info)
+    #pprint(pattern, open('pattern_gen', 'w'))
 
 
 if __name__ == '__main__':
