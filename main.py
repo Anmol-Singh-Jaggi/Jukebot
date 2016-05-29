@@ -5,7 +5,7 @@ import pprint
 import numpy as np
 from keras.models import Sequential, model_from_json
 from keras.layers.recurrent import LSTM
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.core import Dense, Dropout
 
 from process_midi import midi_to_sequence, sequence_to_midi
 
@@ -14,6 +14,7 @@ def load_data():
     state_matrix = []
     for subdir, dirs, files in os.walk('music'):
         for file in files:
+            print 'Loading "' + file + '" ...\n'
             file_path = os.path.join(subdir, file)
             state_matrix.extend(midi_to_sequence(file_path)[0])
     return state_matrix
@@ -47,9 +48,11 @@ def load_model():
 
 
 def main():
+    print 'Loading data ...\n'
     state_matrix = load_data()
     # print len(state_matrix)
     prime_size = 50
+    print 'Preprocessing data ...\n'
     X, Y = preprocess_data(state_matrix, prime_size)
     # print len(X), len(Y)
     X, Y = np.array(X), np.array(Y)
@@ -89,11 +92,12 @@ def main():
     predictions = model.predict(X, batch_size=32, verbose=1)
 
     print predictions.shape
+    print 'Post-processing predictions ...\n'
     predictions = predictions.astype(int).clip(min=0)
     predictions = predictions.tolist()
 
     print 'Writing to output file ...\n'
-    sequence_to_midi(predictions, 'out.mid', (480, None))
+    sequence_to_midi(predictions, 'out.mid', (100, None))
 
 
 if __name__ == '__main__':
