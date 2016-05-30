@@ -1,11 +1,13 @@
 #!/usr/bin/env python2
 import os
-import pprint
+import cPickle as pickle
+from pprint import pprint
 
 import numpy as np
 from keras.models import Sequential, model_from_json
 from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Dropout
+from keras.utils.visualize_util import plot
 
 from process_midi import midi_to_sequence, sequence_to_midi
 
@@ -84,7 +86,8 @@ def main():
         os.system('mkdir -p model_save')
 
         print 'Training model ...\n'
-        model.fit(X, Y, validation_split=0.2)
+        history = model.fit(X, Y, validation_split=0.2)
+        pickle.dump(history, open('model_save/hist.p', 'wb'))
 
         print 'Saving model ...\n'
         save_model(model)
