@@ -31,6 +31,7 @@ def preprocess_data(state_matrix, prime_size):
         Y.append(data_point_y)
     return X, Y
 
+
 model_arch_path = 'model_save/arch.json'
 model_weights_path = 'model_save/weights.h5'
 
