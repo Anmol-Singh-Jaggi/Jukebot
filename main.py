@@ -83,13 +83,17 @@ def main():
         model = load_model()
     else:
         print 'Building model ...\n'
+
+        min_nodes = 128
+        nb_nodes = max(X.shape[2], min_nodes)
+
         model = Sequential()
         print 'Adding layer 1 ...\n'
-        model.add(LSTM(max(X.shape[2], 128), input_shape=(
+        model.add(LSTM(nb_nodes, input_shape=(
             X.shape[1], X.shape[2]), return_sequences=True))
         model.add(Dropout(0.2))
         print 'Adding layer 2 ...\n'
-        model.add(LSTM(max(128, X.shape[2]) * 2))
+        model.add(LSTM(nb_nodes * 2))
         model.add(Dropout(0.2))
         print 'Adding layer 3 ...\n'
         model.add(Dense(X.shape[2]))
