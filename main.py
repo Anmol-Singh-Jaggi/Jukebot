@@ -7,9 +7,8 @@ import numpy as np
 from keras.models import Sequential, model_from_json
 from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Dropout
-from keras.utils.visualize_util import plot
 
-from process_midi import midi_to_sequence, sequence_to_midi
+from midi_sequence import *
 
 
 def load_data():
