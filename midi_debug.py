@@ -6,7 +6,7 @@ import midi
 from pprint import pprint
 
 
-def compress_state(state):
+def desparsify_state(state):
     """
     Outputs the list of notes which are ON in the current state.
     Used mainly for printing/debugging.
@@ -23,7 +23,7 @@ def compress_state(state):
     return ret
 
 
-def compress_state_matrix(state_matrix):
+def desparsify_state_matrix(state_matrix):
     """
     Outputs a 2-D matrix of notes which are ON in the states.
     Used mainly for printing/debugging.
@@ -35,7 +35,7 @@ def compress_state_matrix(state_matrix):
     """
     ret = ""
     for idx, state in enumerate(state_matrix):
-        ret += str(idx) + ".) " + str(compress_state(state)) + "\n"
+        ret += str(idx) + ".) " + str(desparsify_state(state)) + "\n"
     return ret
 
 

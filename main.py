@@ -9,6 +9,8 @@ from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Dropout
 
 from midi_sequence import *
+from midi_volume import *
+from midi_compress import compress_state_matrix, decompress_state_matrix
 
 
 def load_data():
@@ -50,14 +52,30 @@ def load_model():
 
 
 def main():
+    boolean = False
+    compression = True
+
     print 'Loading data ...\n'
     state_matrix = load_data()
     # print len(state_matrix)
+
+    if compression:
+        state_matrix, columns_present = compress_state_matrix(state_matrix)
+
+    if boolean:
+        volume_avg = remove_volume_from_state_matrix(state_matrix)
+        print 'Average volume = ', volume_avg, '\n\n'
+
     prime_size = 50
     print 'Preprocessing data ...\n'
     X, Y = preprocess_data(state_matrix, prime_size)
     # print len(X), len(Y)
-    X, Y = np.array(X), np.array(Y)
+
+    if boolean:
+        X, Y = np.array(X, dtype=bool), np.array(Y, dtype=bool)
+    else:
+        X, Y = np.array(X), np.array(Y)
+
     print X.shape, Y.shape
 
     if os.path.exists('model_save'):
@@ -67,37 +85,50 @@ def main():
         print 'Building model ...\n'
         model = Sequential()
         print 'Adding layer 1 ...\n'
-        model.add(LSTM(X.shape[2], input_shape=(
+        model.add(LSTM(max(X.shape[2], 128), input_shape=(
             X.shape[1], X.shape[2]), return_sequences=True))
         model.add(Dropout(0.2))
         print 'Adding layer 2 ...\n'
-        model.add(LSTM(X.shape[2] * 2))
+        model.add(LSTM(max(128, X.shape[2]) * 2))
         model.add(Dropout(0.2))
         print 'Adding layer 3 ...\n'
         model.add(Dense(X.shape[2]))
         model.add(Dropout(0.2))
 
     print 'Compiling model ...\n'
-    model.compile(loss='mean_squared_error',
-                  optimizer="rmsprop", metrics=['accuracy'])
+    if boolean:
+        model.compile(loss='categorical_crossentropy',
+                      optimizer="rmsprop", metrics=['accuracy'])
+    else:
+        model.compile(loss='mean_squared_error',
+                      optimizer="rmsprop", metrics=['accuracy'])
 
     if not os.path.exists('model_save'):
         os.system('mkdir -p model_save')
 
         print 'Training model ...\n'
         history = model.fit(X, Y, validation_split=0.2)
-        pickle.dump(history, open('model_save/hist.p', 'wb'))
+        #pickle.dump(history, open('model_save/hist.p', 'wb'))
 
         print 'Saving model ...\n'
         save_model(model)
 
     print 'Predicting ...\n'
     predictions = model.predict(X, batch_size=32, verbose=1)
-
     print predictions.shape
+
     print 'Post-processing predictions ...\n'
-    predictions = predictions.astype(int).clip(min=0)
+    if boolean:
+        predictions = np.around(predictions).astype(int).clip(min=0)
+    else:
+        predictions = predictions.astype(int).clip(min=0)
+
     predictions = predictions.tolist()
+    if boolean:
+        insert_volume_into_state_matrix(predictions, volume_avg)
+
+    if compression:
+        predictions = decompress_state_matrix(predictions, columns_present)
 
     print 'Writing to output file ...\n'
     sequence_to_midi(predictions, 'out.mid', (100, None))
