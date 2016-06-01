@@ -44,7 +44,7 @@ def insert_volume_into_state_matrix(state_matrix, volume_new):
 
 
 def main():
-    filepath = 'music/debug.mid'
+    filepath = 'debug.mid'
     state_matrix, _ = midi_to_sequence(filepath)
     print desparsify_state_matrix(state_matrix)
     print '\n\n\n'

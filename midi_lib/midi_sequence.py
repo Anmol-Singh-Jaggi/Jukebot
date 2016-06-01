@@ -154,7 +154,7 @@ def sequence_to_midi(state_matrix, filepath, meta_info=None):
 
 
 def main():
-    filepath = 'music/alb_esp1.mid'
+    filepath = 'debug.mid'
     state_matrix, meta_info = midi_to_sequence(filepath)
     pattern = sequence_to_midi(state_matrix, 'out.mid', meta_info)
     #pprint(pattern, open('pattern_gen', 'w'))
