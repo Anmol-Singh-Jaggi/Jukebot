@@ -102,7 +102,6 @@ def main():
     print 'Preprocessing data ...\n'
     X, Y = preprocess_data(state_matrix, prime_size)
     print 'Preprocessing data done!\n'
-    # print len(X), len(Y)
 
     print 'Casting to numpy-array ...\n'
     if boolean_on:
