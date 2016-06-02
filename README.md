@@ -10,3 +10,4 @@ Generating artificial music using Recurrent Neural Networks.
 
 **To-Do:**
  - Increase the volume of all the notes in the post-processing stage.
+ - Optimize the matrix operations using Numpy.
