@@ -7,7 +7,24 @@ from midi_sequence import *
 
 
 def compress_rows(state_matrix, batch_size):
+    """
+    Compress the state-matrix using row-based compression scheme.
+    :param state_matrix: The state-matrix.
+    :type state_matrix: 2-D list
+    :param batch_size: The number of rows to group together.
+    :type batch_size: int
+    :returns: The compressed state-matrix.
+    :return_type: 2-D list
+    """
     def compute_batch_average(state_matrix, start_idx, end_idx):
+        """
+        Compress state_matrix[start_idx: end_idx] using
+        row-based compression scheme.
+        :param state_matrix: The state-matrix.
+        :type state_matrix: 2-D list
+        :returns: The average of state_matrix[start_idx: end_idx]
+        :return_type: 1-D list
+        """
         ret = [0] * len(state_matrix[0])
 
         for i in xrange(start_idx, end_idx):
@@ -30,10 +47,23 @@ def compress_rows(state_matrix, batch_size):
 
 
 def transpose(grid):
+    """
+    Return the transpose of a matrix.
+    """
     return map(list, zip(*grid))
 
 
 def compress_state_matrix(state_matrix, row_compression_batch_size=0):
+    """
+    Compress the state-matrix using row and column based compression schemes.
+    :param state_matrix: The state-matrix.
+    :type state_matrix: 2-D list
+    :param row_compression_batch_size: The number of rows to group together.
+    :type row_compression_batch_size: int
+    :returns: The compressed state-matrix and the list of column indices
+     remaining after column-compression.
+    :return_type: (2-D list, 1-D list)
+    """
     ret = []
     columns_present = []
 
@@ -53,6 +83,16 @@ def compress_state_matrix(state_matrix, row_compression_batch_size=0):
 
 
 def decompress_state_matrix(state_matrix, columns_present):
+    """
+    Decompress the state-matrix.
+    :param state_matrix: The state-matrix.
+    :type state_matrix: 2-D list
+    :param columns_present: A list of the column indices remaining from the
+     original uncompressed state-matrix after compression .
+    :type columns_present: list
+    :returns: The decompressed state-matrix.
+    :return_type: 2-D list
+    """
     ret = [[0] * 128] * len(state_matrix)
     ret = transpose(ret)
 

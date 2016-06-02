@@ -63,7 +63,7 @@ def get_next_different_state(state_matrix, index):
     :param state_matrix: The state-matrix.
     :type state_matrix: 2-D list
     :returns: The index of the (chronological) next state which is different
-    from the input state.
+     from the input state.
     :return_type: int
     """
     for i in xrange(index + 1, len(state_matrix)):

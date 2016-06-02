@@ -20,7 +20,7 @@ from midi_lib.midi_compress import compress_state_matrix, decompress_state_matri
 
 def load_data():
     """
-    Loads midi files and outputs the concatenated 'state_matrix'.
+    Loads midi files and outputs the concatenated state-matrix.
     :returns: The state-matrix
     :return_type: 2-D list
     """
@@ -36,16 +36,15 @@ def load_data():
 
 def preprocess_data(state_matrix, prime_size):
     """
-    Processes the 2-D state matrix to produce a 3-D version 'X'
+    Processes the 2-D state-matrix to produce a 3-D version 'X'
     of dimensions = len(state_matrix) * prime_size * len(state_matrix[0]).
-    Each 2-D row X[i] becomes a separate datapoint for the
-    time-unrolled neural network.
+    Each 2-D row 'X[i]' becomes a separate datapoint.
     X[i][tick][pitch] = volume
     Corresponding to each datapoint X[i], a target value Y[i] is also computed.
     :param state_matrix: The state-matrix.
     :type state_matrix: 2-D list
     :param prime_size: The size of a single datapoint
-    :type prime_size: integer
+    :type prime_size: int
     :returns: A list of datapoints and the corresponding target output values.
     :return_type: (3-D list, 2-D list)
     """
