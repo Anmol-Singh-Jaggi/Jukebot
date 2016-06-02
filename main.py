@@ -19,6 +19,11 @@ from midi_lib.midi_compress import compress_state_matrix, decompress_state_matri
 
 
 def load_data():
+    """
+    Loads midi files and outputs the concatenated 'state_matrix'.
+    :returns: The state-matrix
+    :return_type: 2-D list
+    """
     state_matrix = []
     for subdir, dirs, files in os.walk('music'):
         for file in files:
@@ -30,23 +35,50 @@ def load_data():
 
 
 def preprocess_data(state_matrix, prime_size):
+    """
+    Processes the 2-D state matrix to produce a 3-D version 'X'
+    of dimensions = len(state_matrix) * prime_size * len(state_matrix[0]).
+    Each 2-D row X[i] becomes a separate datapoint for the
+    time-unrolled neural network.
+    X[i][tick][pitch] = volume
+    Corresponding to each datapoint X[i], a target value Y[i] is also computed.
+    :param state_matrix: The state-matrix.
+    :type state_matrix: 2-D list
+    :param prime_size: The size of a single datapoint
+    :type prime_size: integer
+    :returns: A list of datapoints and the corresponding target output values.
+    :return_type: (3-D list, 2-D list)
+    """
     X = []
     Y = []
+
+    # Skip (step_size - 1) rows while forming the input dataset to save memory.
     step_size = 1
+
     for i in xrange(0, len(state_matrix) - prime_size, step_size):
         data_point_x = state_matrix[i: i + prime_size]
-        data_point_y = state_matrix[i + prime_size]
         X.append(data_point_x)
+
+        data_point_y = state_matrix[i + prime_size]
         Y.append(data_point_y)
+
     return X, Y
 
 
+# Location for saving (serializing) the model.
 model_save_dir = 'models/model_save'
 model_arch_path = model_save_dir + '/arch.json'
 model_weights_path = model_save_dir + '/weights.h5'
 
 
 def save_model(model):
+    """
+    Saves (serializes) the model.
+    Mostly adapted from Keras documentation.
+    :param model: The model to save.
+    :type model: Keras model type
+    :returns: None.
+    """
     def mkdir_p(path):
         """
         Create all the intermediate directories in a path.
@@ -70,6 +102,12 @@ def save_model(model):
 
 
 def load_model():
+    """
+    Loads (deserializes) the model.
+    Mostly adapted from Keras documentation.
+    :returns: None.
+    :return_type: Keras model type
+    """
     model = model_from_json(open(model_arch_path).read())
     model.load_weights(model_weights_path)
     return model
@@ -86,7 +124,7 @@ def main():
 
     if compression_on:
         print 'Compressing ...\n'
-        row_comp_ratio = 30
+        row_comp_ratio = 10
         print 'Row-compression ratio = ', row_comp_ratio
         state_matrix, columns_present = compress_state_matrix(
             state_matrix, row_comp_ratio)
@@ -137,18 +175,11 @@ def main():
         print 'Building model done!\n'
 
     print 'Compiling model ...\n'
-
-    if boolean_on:
-        model.compile(loss='categorical_crossentropy',
-                      optimizer="rmsprop", metrics=['accuracy'])
-    else:
-        model.compile(loss='mean_squared_error',
-                      optimizer="rmsprop", metrics=['accuracy'])
-
+    model.compile(loss='mean_squared_error',
+                  optimizer="rmsprop", metrics=['accuracy'])
     print 'Compiling model done!\n'
 
     if not os.path.exists(model_save_dir):
-
         print 'Training model ...\n'
         history = model.fit(X, Y, validation_split=0.2)
         print 'Training model done!\n'
@@ -180,7 +211,8 @@ def main():
 
     print 'Writing to output file ...\n'
     out_file_path = 'output/' + \
-        str(datetime.datetime.now()).replace(' ', '_') + '.mid'
+        str(datetime.datetime.now()).replace(
+            ' ', '_').replace(':', '_') + '.mid'
     sequence_to_midi(predictions, out_file_path, (100, None))
     print 'Writing to output file done!\n'
 
