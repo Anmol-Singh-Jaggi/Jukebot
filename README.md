@@ -1,4 +1,4 @@
-# Music-generation-using-neural-networks
+# Jukebot
 Generating artificial music using Recurrent Neural Networks
 
 **Dependencies:**
