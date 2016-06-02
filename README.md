@@ -1,9 +1,9 @@
 # Jukebot
-Generating artificial music using Recurrent Neural Networks
+Generating artificial music using Recurrent Neural Networks.
 
 **Dependencies:**
  - `pip install keras`
- - `pip install midi`
+ - `pip install python-midi`
 
 **Usage:**
  - Execute `./main.py`
