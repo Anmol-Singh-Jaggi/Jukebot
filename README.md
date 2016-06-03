@@ -1,5 +1,6 @@
 # Jukebot
 Generating artificial music using Recurrent Neural Networks.
+#### [Hand-picked output samples](https://soundcloud.com/user-693671739/sets/jukebot-hand-picked-output)
 
 **Dependencies:**
  - `pip install keras`
