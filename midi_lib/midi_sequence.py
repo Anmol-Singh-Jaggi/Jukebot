@@ -81,7 +81,7 @@ def state_diff(current_state, next_state):
     :param next_state: The chronologically second state.
     :type next_state: list
     :returns: The set of notes which have been changed b/w 2 states.
-    :return_type: ((int, int), (int, int))
+    :return_type: (list, list)
     """
     notes_on = []
     notes_off = []
@@ -105,7 +105,7 @@ def sequence_to_midi(state_matrix, filepath, meta_info=None):
     :type filepath: str
     :param meta_info: Resolution and tempo-event of the pattern.
     :type meta_info: (int, SetTempoEvent or None) or None
-    :returns: The pattern corresponding to the state matrix.
+    :returns: The pattern sequence corresponding to the state matrix.
     :return_type: list
     """
     resolution, tempo_event = meta_info if meta_info else None
