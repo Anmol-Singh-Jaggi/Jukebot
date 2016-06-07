@@ -194,17 +194,24 @@ def main():
     print predictions.shape
 
     print 'Post-processing predictions ...\n'
+
     if boolean_on:
         predictions = np.around(predictions).astype(int).clip(min=0)
     else:
         predictions = predictions.astype(int).clip(min=0)
 
+    # Converting back to python-list from numpy-array
     predictions = predictions.tolist()
+
     if boolean_on:
+        print 'Converting from boolean ...\n'
         insert_volume_into_state_matrix(predictions, volume_avg)
+        print 'Converting from boolean done!\n'
 
     if compression_on:
+        print 'Decompressing ...\n'
         predictions = decompress_state_matrix(predictions, columns_present)
+        print 'Decompressing done!\n'
 
     print 'Post-processing predictions done!\n'
 
