@@ -65,9 +65,10 @@ def preprocess_data(state_matrix, prime_size):
 
 
 # Location for saving (serializing) the model.
-model_save_dir = 'models/model_save'
-model_arch_path = model_save_dir + '/arch.json'
-model_weights_path = model_save_dir + '/weights.h5'
+model_save_dir = os.path.join('models', 'model_save')
+model_arch_path = os.path.join(model_save_dir, 'arch.json')
+model_weights_path = os.path.join(model_save_dir, 'weights.h5')
+model_history_path = os.path.join(model_save_dir, 'hist.p')
 
 
 def save_model(model):
@@ -182,7 +183,7 @@ def main():
         print 'Training model ...\n'
         history = model.fit(X, Y, validation_split=0.2)
         print 'Training model done!\n'
-        # pickle.dump(history, open(model_save_dir + '/hist.p', 'wb'))
+        # pickle.dump(history, open(model_history_path, 'wb'))
 
         print 'Saving model ...\n'
         save_model(model)
